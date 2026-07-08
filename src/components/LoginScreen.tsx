@@ -82,6 +82,7 @@ export default function LoginScreen() {
             </button>
           </form>
 
+          {process.env.NEXT_PUBLIC_SHOW_DEMO === "true" && (
           <div className="mt-6">
             <div className="eyebrow mb-2">Demo accounts · click to fill (pw: level2026)</div>
             <div className="space-y-1">
@@ -101,6 +102,7 @@ export default function LoginScreen() {
               ))}
             </div>
           </div>
+          )}
         </div>
       </div>
     </div>

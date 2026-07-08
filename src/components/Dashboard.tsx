@@ -17,8 +17,10 @@ import DemurrageCalculator from "./DemurrageCalculator";
 import LogisticsTab from "./LogisticsTab";
 import MarketTab from "./MarketTab";
 import ComplianceTab from "./ComplianceTab";
+import TeamManagement from "./TeamManagement";
+import ChangePasswordModal from "./ChangePasswordModal";
 
-type View = "overview" | "console" | "planning" | "logistics" | "market" | "compliance";
+type View = "overview" | "console" | "planning" | "logistics" | "market" | "compliance" | "team";
 
 const VesselMap = dynamic(() => import("./VesselMap"), {
   ssr: false,
@@ -48,6 +50,8 @@ function TopBar({
   const { profile, signOut } = useAuth();
   const [ago, setAgo] = useState(0);
   const [menu, setMenu] = useState(false);
+  const [showPw, setShowPw] = useState(false);
+  const isAdmin = profile?.role === "admin";
   useEffect(() => {
     const id = setInterval(() => setAgo(Math.floor((Date.now() - lastUpdate) / 1000)), 1000);
     return () => clearInterval(id);
@@ -95,13 +99,13 @@ function TopBar({
           )}
         </nav>
 
-        <div className="ml-auto flex items-center gap-4">
-          <div className="hidden sm:flex items-center gap-2 text-[11px]">
+        <div className="ml-auto flex items-center gap-3 sm:gap-4">
+          <div className="hidden md:flex items-center gap-2 text-[11px]">
             <span className={live ? "livedot" : "w-[7px] h-[7px] rounded-full bg-red"} />
             <span className="num text-ink-dim">{live ? "LIVE" : "OFFLINE"}</span>
-            <span className="num text-ink-mute">· sync {ago}s</span>
+            <span className="hidden lg:inline num text-ink-mute">· sync {ago}s</span>
           </div>
-          <div className="num text-[12px] text-ink tabular-nums hidden sm:block">{clock || "—"}</div>
+          <div className="num text-[12px] text-ink tabular-nums hidden lg:block">{clock || "—"}</div>
 
           {/* user menu */}
           <div className="relative">
@@ -127,6 +131,16 @@ function TopBar({
                       <span className="text-[10px] text-ink-mute">{profile?.org}</span>
                     </div>
                   </div>
+                  {isAdmin && (
+                    <button onClick={() => { setView("team"); setMenu(false); }}
+                      className="w-full text-left px-3 py-2 text-[12px] text-ink-dim hover:bg-panel-2 hover:text-amber rounded-sm transition-colors">
+                      Manage team
+                    </button>
+                  )}
+                  <button onClick={() => { setShowPw(true); setMenu(false); }}
+                    className="w-full text-left px-3 py-2 text-[12px] text-ink-dim hover:bg-panel-2 hover:text-ink rounded-sm transition-colors">
+                    Change password
+                  </button>
                   <button onClick={signOut}
                     className="w-full text-left px-3 py-2 text-[12px] text-ink-dim hover:bg-panel-2 hover:text-red rounded-sm transition-colors">
                     Sign out
@@ -137,6 +151,8 @@ function TopBar({
           </div>
         </div>
       </div>
+
+      {showPw && <ChangePasswordModal onClose={() => setShowPw(false)} />}
 
       {/* mobile nav — horizontally scrollable tab strip (desktop uses the row above) */}
       <div className="md:hidden overflow-x-auto no-scrollbar border-t border-line/60">
@@ -170,8 +186,9 @@ export default function Dashboard({ initial }: { initial: DashboardData }) {
   const [lastUpdate, setLastUpdate] = useState(Date.now());
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // guard: non-editors can never land on the console
+  // guard: non-editors can never land on the console; non-admins never on team
   useEffect(() => { if (view === "console" && !canEdit) setView("overview"); }, [view, canEdit]);
+  useEffect(() => { if (view === "team" && profile?.role !== "admin") setView("overview"); }, [view, profile]);
 
   const refresh = useCallback(() => {
     if (debounce.current) clearTimeout(debounce.current);
@@ -272,6 +289,8 @@ export default function Dashboard({ initial }: { initial: DashboardData }) {
           <MarketTab data={data} />
         ) : view === "compliance" ? (
           <ComplianceTab data={data} />
+        ) : view === "team" && profile?.role === "admin" ? (
+          <TeamManagement />
         ) : (
           <>
             {/* KPI strip */}
