@@ -29,7 +29,7 @@ const field =
 
 function Card({ title, sub, can, children }: { title: string; sub: string; can: boolean; children: React.ReactNode }) {
   return (
-    <div className={`panel p-4 ${can ? "" : "opacity-45 pointer-events-none"}`}>
+    <div className={`panel p-4 flex flex-col ${can ? "" : "opacity-45 pointer-events-none"}`}>
       <div className="flex items-center justify-between mb-3">
         <div>
           <div className="eyebrow">{sub}</div>
@@ -37,7 +37,8 @@ function Card({ title, sub, can, children }: { title: string; sub: string; can: 
         </div>
         {!can && <span className="num text-[9px] uppercase tracking-wider text-ink-mute px-1.5 py-0.5 rounded-sm bg-panel-2">no access</span>}
       </div>
-      {children}
+      {/* fill the (grid-stretched) card height so the submit button pins to the bottom */}
+      <div className="flex flex-1 flex-col">{children}</div>
     </div>
   );
 }
@@ -138,7 +139,9 @@ export default function DataConsole({
               <input className={field} type="number" value={rd.throughput} onChange={(e) => setRd({ ...rd, throughput: e.target.value })} placeholder="carries forward if blank" />
             </div>
           </div>
-          <button onClick={submitReading} className="mt-3 w-full bg-teal/90 text-base font-bold text-[12px] rounded-sm py-2 tracking-wide hover:bg-teal transition-colors">POST READING</button>
+          <div className="mt-auto pt-3">
+            <button onClick={submitReading} className="w-full bg-teal/90 text-base font-bold text-[12px] rounded-sm py-2 tracking-wide hover:bg-teal transition-colors">POST READING</button>
+          </div>
         </Card>
 
         {/* Price */}
@@ -186,7 +189,9 @@ export default function DataConsole({
               </span>
             </div>
           )}
-          <button onClick={submitPrice} className="mt-3 w-full bg-amber text-base font-bold text-[12px] rounded-sm py-2 tracking-wide hover:bg-amber/90 transition-colors">POST PRICE</button>
+          <div className="mt-auto pt-3">
+            <button onClick={submitPrice} className="w-full bg-amber text-base font-bold text-[12px] rounded-sm py-2 tracking-wide hover:bg-amber/90 transition-colors">POST PRICE</button>
+          </div>
         </Card>
 
         {/* Alert */}
@@ -214,7 +219,9 @@ export default function DataConsole({
               <input className={field} value={al.body} onChange={(e) => setAl({ ...al, body: e.target.value })} placeholder="context / recommendation" />
             </div>
           </div>
-          <button onClick={submitAlert} className="mt-3 w-full bg-blue/90 text-base font-bold text-[12px] rounded-sm py-2 tracking-wide hover:bg-blue transition-colors">BROADCAST ALERT</button>
+          <div className="mt-auto pt-3">
+            <button onClick={submitAlert} className="w-full bg-blue/90 text-base font-bold text-[12px] rounded-sm py-2 tracking-wide hover:bg-blue transition-colors">BROADCAST ALERT</button>
+          </div>
         </Card>
 
         {/* Berth */}
@@ -253,7 +260,9 @@ export default function DataConsole({
               <input className={field} type="datetime-local" value={bt.eta} onChange={(e) => setBt({ ...bt, eta: e.target.value })} />
             </div>
           </div>
-          <button onClick={submitBerth} className="mt-3 w-full bg-ink text-base font-bold text-[12px] rounded-sm py-2 tracking-wide hover:bg-ink/90 transition-colors">SAVE BERTH ENTRY</button>
+          <div className="mt-auto pt-3">
+            <button onClick={submitBerth} className="w-full bg-ink text-base font-bold text-[12px] rounded-sm py-2 tracking-wide hover:bg-ink/90 transition-colors">SAVE BERTH ENTRY</button>
+          </div>
         </Card>
       </div>
 
